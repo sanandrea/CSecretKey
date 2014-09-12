@@ -1,3 +1,4 @@
+=
 This is an implementation of the hmac, key-hashing authentication code in the C language.
 The generation of the secret key is included in the final binary. 
 
