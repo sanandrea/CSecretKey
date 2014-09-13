@@ -6,7 +6,8 @@ The secret key is obtained by concatenating 3 String against some pseudo random 
 
 This can be really useful (I hope so) in mobile Applications (Android & iOS) where the client must be equipped with a secret key to access a private API across the network.
 
-###To customize, in hmac_256.c:
+###To customize
+In hmac_256.c:
 * Change aux1, aux2, aux3 contents with yours.
 * Change rain and salt to some integers 
 * Change snow and pepper to some integers 
