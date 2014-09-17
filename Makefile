@@ -1,24 +1,34 @@
+CFLAGS=-Wall
+TEST_BUILD=test
+
+ALL_SOURCES = $(wildcard *.c)
+SOURCES := $(filter-out test.c,$(ALL_SOURCES))
+OBJECTS = $(SOURCES:.c=.o)
+
 all: lib test
-test: clean lib_plain
-	gcc -o test test.c -lhmacenc -L.
+
+test: CFLAGS+= -DSHOW_PASS
+test: clean lib
+	@python reverse_test.py
+
 
 production: clean lib
-	gcc -o test test.c -lhmacenc -L.
+	$(CC) -o $(TEST_BUILD) test.c -lhmacenc -L.
 
-hmac_256.o: hmac_sha256.c hmac_sha256.h
-	$(CC) -Wall -c hmac_sha256.c -o hmac_256.o
+%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
 
-hmac_256_plain.o: hmac_sha256.c hmac_sha256.h
-	$(CC) -Wall -DSHOW_PASS -c hmac_sha256.c -o hmac_256_plain.o
+lib: $(OBJECTS)
+	$(info ************  CREATE LIBRARY ************)
+	$(CC) -shared -o libhmacenc.so $(OBJECTS) -lc
+	strip libhmacenc.so
 
-lib: hmac_256.o sha2.o
-	gcc -shared -Wl -o libhmacenc.so hmac_256.o sha2.o -lc
+static_lib: $(OBJECTS)
+	$(AR) rcs libhmacenc.a $(OBJECTS)
 
-lib_plain: hmac_256_plain.o sha2.o
-	gcc -shared -Wl -o libhmacenc.so hmac_256_plain.o sha2.o -lc
-
-sha2.o: sha2.c sha2.h
-	$(CC) -c sha2.c -o sha2.o
+cygwin: clean static_lib
+	$(CC) -static test.c -L. -lhmacenc -o $(TEST_BUILD)
 
 clean:
-	- rm -rf *.o hmac *.so
+	$(info ************ CLEAN ************)
+	-@rm -rf *.o hmac *.so *.a $(TEST_BUILD)
